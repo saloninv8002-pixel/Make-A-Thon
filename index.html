@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRACE | Digital Twin Smart Door Security Platform</title>
+  
+  <!-- Fonts: Inter & Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Socket.IO Client via CDN -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Mobile Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ====================================================================
+         FIXED LEFT SIDEBAR
+         ==================================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="#" class="brand-wrapper" onclick="window.TRACE.switchView('dashboard'); return false;">
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">TRACE</span>
+            <span class="brand-subtitle">Smart Door Twin</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+
+        <a class="nav-item active" data-view="dashboard" href="#dashboard">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </span>
+          <span>Dashboard</span>
+        </a>
+
+        <a class="nav-item" data-view="digital-twin" href="#digital-twin">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </span>
+          <span>Digital Twin</span>
+        </a>
+
+        <a class="nav-item" data-view="access-control" href="#access-control">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M7 15h0M2 9.5h20"/>
+            </svg>
+          </span>
+          <span>Access Control</span>
+        </a>
+
+        <a class="nav-item" data-view="alerts" href="#alerts">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </span>
+          <span>Alerts &amp; Incidents</span>
+          <span class="nav-badge" id="alertsNavBadge">0</span>
+        </a>
+
+        <a class="nav-item" data-view="simulator" href="#simulator">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </span>
+          <span>Scenario Simulator</span>
+        </a>
+
+        <div class="nav-section-title">Audit &amp; System</div>
+
+        <a class="nav-item" data-view="event-history" href="#event-history">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 14 14"/>
+            </svg>
+          </span>
+          <span>Event History</span>
+        </a>
+
+        <a class="nav-item" data-view="settings" href="#settings">
+          <span class="nav-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Device Status Indicator -->
+      <div class="sidebar-footer">
+        <div class="device-status-card">
+          <div class="device-status-header">
+            <span class="device-name">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+              ESP32 Edge Node
+            </span>
+            <span class="device-ping">5.0V</span>
+          </div>
+          <div>
+            <span class="status-indicator-pill demo" id="sidebarStatusPill">
+              <span class="status-dot"></span> DEMO MODE
+            </span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN CONTENT WRAPPER
+         ==================================================================== -->
+    <div class="main-wrapper">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="page-title-box">
+            <h1 class="page-title" id="topbarPageTitle">Security Dashboard</h1>
+            <span class="page-breadcrumb" id="topbarBreadcrumb">TRACE / Security Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Live Date & Clock -->
+          <div class="live-clock-card">
+            <svg class="clock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="clock-time" id="clockTime">--:--:--</span>
+            <span class="clock-date" id="clockDate">---</span>
+          </div>
+
+          <!-- Connection Status Pill -->
+          <div class="mode-pill" id="topbarModePill" title="Click to view connection settings">
+            <span class="status-dot"></span>
+            <span id="modePillText">DEMO MODE (STANDALONE)</span>
+          </div>
+
+          <!-- Audio FX Toggle -->
+          <button class="icon-action-btn active" id="audioToggleBtn" title="Toggle audio alert chime">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+
+          <!-- Notification Bell -->
+          <button class="icon-action-btn" id="topbarBellBtn" title="View Security Incidents">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="btn-badge" id="topbarBellBadge">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <main class="content-body">
+
+        <!-- ==============================================================
+             SECTION 1: DASHBOARD VIEW
+             ============================================================== -->
+        <section class="view-section active" id="view-dashboard">
+          
+          <!-- Top 6 Status Cards -->
+          <div class="kpi-grid">
+            <!-- 1. Door Status -->
+            <div class="kpi-card state-secure" id="kpiDoorCard">
+              <div class="kpi-top">
+                <span class="kpi-label">Door Status</span>
+                <div class="kpi-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><circle cx="14" cy="12" r="1"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value" id="kpiDoorVal">CLOSED</span>
+              </div>
+              <div class="kpi-subtext" id="kpiDoorSub">
+                <span class="status-dot"></span> Magnetic seal engaged
+              </div>
+            </div>
+
+            <!-- 2. Lock Status -->
+            <div class="kpi-card state-secure" id="kpiLockCard">
+              <div class="kpi-top">
+                <span class="kpi-label">Lock Status</span>
+                <div class="kpi-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value" id="kpiLockVal">LOCKED</span>
+              </div>
+              <div class="kpi-subtext" id="kpiLockSub">
+                <span class="status-dot"></span> Deadbolt extended (0°)
+              </div>
+            </div>
+
+            <!-- 3. Security Status -->
+            <div class="kpi-card state-secure" id="kpiSecCard">
+              <div class="kpi-top">
+                <span class="kpi-label">Security Status</span>
+                <div class="kpi-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value" id="kpiSecVal">SECURE</span>
+              </div>
+              <div class="kpi-subtext" id="kpiSecSub">
+                <span class="status-dot"></span> All 4 rules validated
+              </div>
+            </div>
+
+            <!-- 4. RFID Status -->
+            <div class="kpi-card state-info" id="kpiRfidCard">
+              <div class="kpi-top">
+                <span class="kpi-label">RFID Reader</span>
+                <div class="kpi-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value" id="kpiRfidVal">ACTIVE</span>
+              </div>
+              <div class="kpi-subtext" id="kpiRfidSub">
+                RC522 SPI 13.56 MHz
+              </div>
+            </div>
+
+            <!-- 5. Today's Access Attempts -->
+            <div class="kpi-card" id="kpiAttemptsCard">
+              <div class="kpi-top">
+                <span class="kpi-label">Today's Attempts</span>
+                <div class="kpi-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value" id="kpiAttemptsVal">42</span>
+              </div>
+              <div class="kpi-subtext" id="kpiAttemptsSub">
+                90% success rate (38 / 4)
+              </div>
+            </div>
+
+            <!-- 6. Active Alerts -->
+            <div class="kpi-card" id="kpiAlertsCard">
+              <div class="kpi-top">
+                <span class="kpi-label">Active Alerts</span>
+                <div class="kpi-icon-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value" id="kpiAlertsVal">0</span>
+              </div>
+              <div class="kpi-subtext" id="kpiAlertsSub">
+                <span class="status-dot"></span> Zero unhandled incidents
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Dashboard Split: Mini Digital Twin Preview + Access Chart -->
+          <div class="dashboard-grid-main">
+            <!-- Digital Twin Interactive Preview Card -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    Digital Twin Preview
+                  </h2>
+                  <span class="card-subtitle">Real-time synchronized physical state</span>
+                </div>
+                <span class="badge badge-success" id="dashMiniStateBadge">CLOSED + LOCKED</span>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-around; padding: 20px 0; background: radial-gradient(circle at 50% 50%, #152338 0%, #0E1726 100%); border-radius: var(--border-radius-md); border: 1px solid var(--border-subtle); margin-bottom: 18px;">
+                <!-- Mini Door 3D representation -->
+                <div style="perspective: 600px; width: 110px; height: 160px; position: relative;">
+                  <div style="width: 100%; height: 100%; border: 6px solid #20344F; border-bottom: 4px solid #1E293B; border-radius: 4px; background: #0A111C; position: relative;">
+                    <div id="dashMiniDoorLeaf" style="width: 100%; height: 100%; background: linear-gradient(135deg, #1E2D42, #131E2E); border: 1px solid rgba(56, 189, 248, 0.25); transform-origin: left center; transition: transform 0.6s ease; transform: rotateY(0deg); position: relative;">
+                      <div id="dashMiniLockLed" style="position: absolute; right: 8px; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.84rem;">
+                  <div>
+                    <span style="color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase;">Actuator Servo</span>
+                    <div style="font-family: var(--font-mono); color: var(--accent-secondary); font-weight: 700;">SG90 PWM Pin 18 (0°)</div>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase;">Magnetic Sensor</span>
+                    <div style="font-family: var(--font-mono); color: var(--accent-primary); font-weight: 700;">Reed Switch Pin 4 (Contact)</div>
+                  </div>
+                  <div>
+                    <span style="color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase;">Anomaly Rule Engine</span>
+                    <div style="color: var(--status-success); font-weight: 600;">Active Monitoring (0 Conflicts)</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Control Buttons -->
+              <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary btn-sm" id="dashQuickUnlockBtn">Quick Unlock</button>
+                <button class="btn btn-primary btn-sm" id="dashQuickLockBtn">Quick Lock</button>
+                <button class="btn btn-outline btn-sm" id="dashViewTwinBtn">Open Full 3D Twin &rarr;</button>
+              </div>
+            </div>
+
+            <!-- Access Chart Card -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                    Successful vs Failed Access
+                  </h2>
+                  <span class="card-subtitle">Daily authorization ratio &amp; telemetry</span>
+                </div>
+                <span class="badge badge-info">TODAY</span>
+              </div>
+              <div style="height: 220px; position: relative;">
+                <canvas id="accessRatioChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub Grid: Recent Security Events & Device Health -->
+          <div class="dashboard-grid-sub">
+            <!-- Recent Events Table Card -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                    Recent Security Events
+                  </h2>
+                  <span class="card-subtitle">Real-time audit log stream</span>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="window.TRACE.switchView('event-history')">View All</button>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Event</th>
+                      <th>Method</th>
+                      <th>Severity</th>
+                      <th style="text-align: right;">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashRecentEventsList">
+                    <!-- Populated dynamically by dashboard.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Hardware Device Health Section -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    Hardware Peripherals Health
+                  </h2>
+                  <span class="card-subtitle">ESP32 edge controller &amp; sensor pinout status</span>
+                </div>
+                <span class="badge badge-success">ALL SYSTEMS ONLINE</span>
+              </div>
+
+              <div class="specs-list">
+                <div class="spec-item">
+                  <span class="spec-label">ESP32 Microcontroller Node</span>
+                  <span class="spec-val" id="healthEspStatus">ONLINE</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Magnetic Reed Switch (Pin 4)</span>
+                  <span class="spec-val" id="healthReedStatus">CLOSED (OK)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">SG90 Servo Lock Actuator (Pin 18)</span>
+                  <span class="spec-val" id="healthServoStatus">0° (EXTENDED)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">RC522 RFID Sensor (SPI 13.56 MHz)</span>
+                  <span class="spec-val" id="healthRfidStatus">ACTIVE</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">4x4 Matrix Keypad (GPIO 8-pin)</span>
+                  <span class="spec-val" id="healthKeypadStatus">ACTIVE</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Piezo Buzzer Siren (Pin 19)</span>
+                  <span class="spec-val" id="healthBuzzerStatus">IDLE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ==============================================================
+             SECTION 2: DIGITAL TWIN PAGE (HIGHLIGHT FEATURE)
+             ============================================================== -->
+        <section class="view-section" id="view-digital-twin">
+          <div class="twin-container">
+            
+            <!-- 3D Digital Twin Viewport Stage -->
+            <div class="twin-viewport-card" id="twinViewportCard">
+              
+              <!-- Strobe warning beacons on top corners -->
+              <div class="alarm-beacon beacon-left" id="beaconLeft" title="Alarm Strobe Beacon Left"></div>
+              <div class="alarm-beacon beacon-right" id="beaconRight" title="Alarm Strobe Beacon Right"></div>
+
+              <div class="twin-viewport-header">
+                <div>
+                  <h2 class="card-title" style="font-size: 1.3rem;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    Digital Twin 3D Smart Door Model
+                  </h2>
+                  <span class="card-subtitle">Real-time physical-virtual sensor mirror</span>
+                </div>
+                <div class="twin-badge-row">
+                  <span class="badge badge-simulated" id="twinTelemetrySourceBadge">
+                    <span class="status-dot"></span> SIMULATED TWIN TELEMETRY
+                  </span>
+                  <div class="twin-state-badge state-closed-locked" id="twinStateBadge">
+                    <span class="status-dot"></span> CLOSED + LOCKED (SECURE)
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3D Door Perspective Stage -->
+              <div class="twin-stage">
+                <!-- Ground reflection grid -->
+                <div class="stage-floor"></div>
+
+                <!-- Outer Door Frame Assembly -->
+                <div class="door-frame-wrapper">
+                  <!-- Magnetic Reed Sensor on Frame Header -->
+                  <div class="sensor-reed-frame" title="Magnetic Reed Switch (Frame)"></div>
+                  <div class="sensor-reed-door" title="Magnetic Reed Magnet (Door Leaf)"></div>
+                  <div class="magnetic-flux-indicator" id="twinMagneticFlux" title="Magnetic Field Beam"></div>
+
+                  <!-- Frame Strike Plate with Deadbolt Hole -->
+                  <div class="frame-strike-plate">
+                    <div class="strike-hole"></div>
+                  </div>
+
+                  <!-- 3D Hinged Door Leaf -->
+                  <div class="door-leaf state-closed" id="twinDoorLeaf">
+                    <div class="door-panel-groove"></div>
+
+                    <!-- Motorized Deadbolt extending from door leaf edge -->
+                    <div class="servo-deadbolt locked" id="twinDeadbolt" title="SG90 Motorized Deadbolt"></div>
+
+                    <!-- Smart Lock Escutcheon Handle Assembly -->
+                    <div class="smart-lock-assembly">
+                      <!-- Status LED Bar (Green / Amber / Red) -->
+                      <div class="lock-led-bar" id="twinLockLed"></div>
+
+                      <!-- 4x4 Mini Keypad -->
+                      <div class="lock-keypad-mini">
+                        <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+                        <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+                        <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+                        <div class="mini-key"></div><div class="mini-key"></div><div class="mini-key"></div>
+                      </div>
+
+                      <!-- RFID Reader Zone -->
+                      <div class="lock-rfid-zone" id="twinRfidZone" title="RC522 RFID Antenna">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.93 4.93a10 10 0 0 1 14.14 0M7.76 7.76a6 6 0 0 1 8.48 0M10.59 10.59a2 2 0 0 1 2.82 0"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HUD Telemetry Bar & Manual Interactive Controls -->
+              <div class="twin-hud-bar">
+                <div class="twin-hud-telemetry">
+                  <div class="hud-item">
+                    <span class="hud-item-label">Door Angle</span>
+                    <span class="hud-item-val" id="hudAngle">0°</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-item-label">Lock Servo PWM</span>
+                    <span class="hud-item-val" id="hudServo">0° (LOCKED)</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-item-label">Magnetic Reed</span>
+                    <span class="hud-item-val" id="hudReed">CONTACT (0mm)</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-item-label">Bus Voltage</span>
+                    <span class="hud-item-val" id="hudVoltage">5.02V</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-item-label">WiFi RSSI</span>
+                    <span class="hud-item-val" id="hudRssi">-56 dBm</span>
+                  </div>
+                  <div class="hud-item">
+                    <span class="hud-item-label">Last Change</span>
+                    <span class="hud-item-val" id="hudLastChange">Just now</span>
+                  </div>
+                </div>
+
+                <div class="twin-hud-actions">
+                  <button class="btn btn-secondary btn-sm" id="twinActionUnlock">Unlock</button>
+                  <button class="btn btn-primary btn-sm" id="twinActionLock">Lock</button>
+                  <button class="btn btn-outline btn-sm" id="twinActionOpen">Open Door</button>
+                  <button class="btn btn-outline btn-sm" id="twinActionClose">Close Door</button>
+                  <button class="btn btn-danger btn-sm" id="twinActionReset" title="Silence Alarms &amp; Reset to Secure">Reset Baseline</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Telemetry Diagnostics & Peripheral Status Panel -->
+            <div class="card" style="margin-bottom: 20px;">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    Sensor Telemetry Diagnostics
+                  </h2>
+                  <span class="card-subtitle">Real-time edge sensor readings &amp; peripheral statuses</span>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);">
+                  Telemetry ping: <span id="hudLastUpdate" style="color: var(--accent-secondary); font-weight: 700;">Just now</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;">
+                <div class="spec-item">
+                  <span class="spec-label">Current Door State:</span>
+                  <span class="spec-val" id="twinCurDoor">CLOSED</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Current Lock State:</span>
+                  <span class="spec-val" id="twinCurLock">LOCKED</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">RFID Reader Status:</span>
+                  <span class="spec-val" id="twinCurRfid">ACTIVE</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">4x4 Keypad Status:</span>
+                  <span class="spec-val" id="twinCurKeypad">ACTIVE</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Magnetic Reed Switch:</span>
+                  <span class="spec-val" id="twinCurReed">CONTACT</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">SG90 Servo Actuator:</span>
+                  <span class="spec-val" id="twinCurServo">EXTENDED</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Last Sensor Packet:</span>
+                  <span class="spec-val" id="twinCurUpdate">--:--:--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Telemetry Details + SYSTEM RULES PANEL -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    System Rules Matrix
+                  </h2>
+                  <span class="card-subtitle">Automated anomaly detection &amp; mismatch verification logic</span>
+                </div>
+                <span class="badge badge-info">4 RULES ACTIVE</span>
+              </div>
+
+              <div class="system-rules-grid">
+                <!-- Rule 1 -->
+                <div class="rule-card" id="ruleCard1">
+                  <div class="rule-card-header">
+                    <div>
+                      <div class="rule-num">RULE #1</div>
+                      <div class="rule-title">Forced Entry Detection</div>
+                    </div>
+                    <span class="rule-status-badge normal" id="ruleBadge1">EVALUATING (OK)</span>
+                  </div>
+                  <p class="rule-desc">
+                    If physical door opens while lock state is LOCKED: flags possible forced entry or sensor fault. Immediately triggers strobe and siren.
+                  </p>
+                </div>
+
+                <!-- Rule 2 -->
+                <div class="rule-card" id="ruleCard2">
+                  <div class="rule-card-header">
+                    <div>
+                      <div class="rule-num">RULE #2</div>
+                      <div class="rule-title">Three Wrong PIN Attempts</div>
+                    </div>
+                    <span class="rule-status-badge normal" id="ruleBadge2">NORMAL (0/3)</span>
+                  </div>
+                  <p class="rule-desc">
+                    Three consecutive incorrect PIN entries triggers brute-force break-in flag, temporary keypad lockout (60s), and security alert.
+                  </p>
+                </div>
+
+                <!-- Rule 3 -->
+                <div class="rule-card" id="ruleCard3">
+                  <div class="rule-card-header">
+                    <div>
+                      <div class="rule-num">RULE #3</div>
+                      <div class="rule-title">Door Open &gt; 2 Minutes</div>
+                    </div>
+                    <span class="rule-status-badge normal" id="ruleBadge3">MONITORING (&lt;120s)</span>
+                  </div>
+                  <p class="rule-desc">
+                    If door remains open beyond 120-second safety threshold: triggers a persistent Door-Held-Open security warning alert.
+                  </p>
+                </div>
+
+                <!-- Rule 4 -->
+                <div class="rule-card" id="ruleCard4">
+                  <div class="rule-card-header">
+                    <div>
+                      <div class="rule-num">RULE #4</div>
+                      <div class="rule-title">Sensor Telemetry Heartbeat</div>
+                    </div>
+                    <span class="rule-status-badge normal" id="ruleBadge4">TELEMETRY LIVE</span>
+                  </div>
+                  <p class="rule-desc">
+                    Loss of sensor telemetry packet or ESP32 heartbeat flags an immediate sensor communication warning or wire severance alert.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ==============================================================
+             SECTION 3: ACCESS CONTROL PAGE
+             ============================================================== -->
+        <section class="view-section" id="view-access-control">
+          
+          <!-- Access Control Metrics -->
+          <div class="kpi-grid">
+            <div class="kpi-card state-info">
+              <div class="kpi-top">
+                <span class="kpi-label">RFID Access Attempts</span>
+                <div class="kpi-icon-wrapper"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
+              </div>
+              <div class="kpi-value-row"><span class="kpi-value" id="accRfidAttempts">29</span></div>
+              <div class="kpi-subtext">RC522 13.56MHz Contactless</div>
+            </div>
+
+            <div class="kpi-card state-info">
+              <div class="kpi-top">
+                <span class="kpi-label">Keypad Access Attempts</span>
+                <div class="kpi-icon-wrapper"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="8" cy="8" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="8" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><circle cx="8" cy="16" r="1"/><circle cx="12" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg></div>
+              </div>
+              <div class="kpi-value-row"><span class="kpi-value" id="accKeypadAttempts">13</span></div>
+              <div class="kpi-subtext">4x4 Matrix PIN Authentications</div>
+            </div>
+
+            <div class="kpi-card state-secure">
+              <div class="kpi-top">
+                <span class="kpi-label">Successful Access</span>
+                <div class="kpi-icon-wrapper"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              </div>
+              <div class="kpi-value-row"><span class="kpi-value" id="accSuccessAttempts">38</span></div>
+              <div class="kpi-subtext">Authorized credentials verified</div>
+            </div>
+
+            <div class="kpi-card state-critical">
+              <div class="kpi-top">
+                <span class="kpi-label">Failed Access</span>
+                <div class="kpi-icon-wrapper"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+              </div>
+              <div class="kpi-value-row"><span class="kpi-value" id="accFailedAttempts">4</span></div>
+              <div class="kpi-subtext">Rejected unauthorized attempts</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Success Rate</span>
+                <div class="kpi-icon-wrapper"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12A10 10 0 1 1 12 2v10z"/></svg></div>
+              </div>
+              <div class="kpi-value-row"><span class="kpi-value" id="accSuccessRate">90%</span></div>
+              <div class="kpi-subtext">Calculated authorization ratio</div>
+            </div>
+          </div>
+
+          <!-- Access Workspace: Interactive Testing Pad + Activity Chart -->
+          <div class="access-workspace-grid">
+            
+            <!-- Interactive Hardware Tester Pad -->
+            <div class="interactive-pad-card">
+              <div class="card-header" style="margin-bottom: 0;">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Interactive Tester
+                  </h2>
+                  <span class="card-subtitle">Live hardware simulation for judges</span>
+                </div>
+              </div>
+
+              <!-- Tab Navigation -->
+              <div class="hardware-tab-nav">
+                <button class="tab-btn hardware-tab-btn active" data-tab="tab-rfid">RFID Card Tap</button>
+                <button class="tab-btn hardware-tab-btn" data-tab="tab-keypad">4x4 Keypad PIN</button>
+              </div>
+
+              <!-- Tab 1: Virtual RFID Tap -->
+              <div class="hardware-tab-pane active" id="tab-rfid">
+                <div class="input-group" style="margin-bottom: 14px;">
+                  <label class="input-label">Select Test Badge Credential:</label>
+                  <select class="form-control" id="rfidSelectCard">
+                    <option value="admin">Alex Chen (Admin) - #A94-F2 [Authorized]</option>
+                    <option value="staff">Priya Sharma (Staff) - #B12-E8 [Authorized]</option>
+                    <option value="security">Marcus Vance (Patrol) - #M82-C1 [Authorized]</option>
+                    <option value="intruder">Cloned / Rogue Badge - #X99-BAD [DENIED]</option>
+                  </select>
+                </div>
+
+                <div class="rfid-tap-zone" id="btnSimulateRfidTap">
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg>
+                  <div>
+                    <div style="font-weight: 700; color: var(--text-primary);">TAP RFID BADGE HERE</div>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary);">Simulates contactless 13.56 MHz NFC read</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 2: Interactive 4x4 Keypad -->
+              <div class="hardware-tab-pane" id="tab-keypad">
+                <div class="keypad-display" id="keypadScreen">----</div>
+                <div class="virtual-keypad">
+                  <button class="keypad-key keypad-digit-key" data-key="1">1</button>
+                  <button class="keypad-key keypad-digit-key" data-key="2">2</button>
+                  <button class="keypad-key keypad-digit-key" data-key="3">3</button>
+                  <button class="keypad-key keypad-digit-key" data-key="4">4</button>
+                  <button class="keypad-key keypad-digit-key" data-key="5">5</button>
+                  <button class="keypad-key keypad-digit-key" data-key="6">6</button>
+                  <button class="keypad-key keypad-digit-key" data-key="7">7</button>
+                  <button class="keypad-key keypad-digit-key" data-key="8">8</button>
+                  <button class="keypad-key keypad-digit-key" data-key="9">9</button>
+                  <button class="keypad-key key-action key-clear" id="keypadBtnClear">CLR</button>
+                  <button class="keypad-key keypad-digit-key" data-key="0">0</button>
+                  <button class="keypad-key key-action key-enter" id="keypadBtnEnter">ENT</button>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 10px;">
+                  Valid PINs: <span style="color: var(--accent-secondary); font-family: var(--font-mono);">1379</span>, <span style="color: var(--accent-secondary); font-family: var(--font-mono);">4521</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Activity Hourly Stacked Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Access Activity Timeline
+                  </h2>
+                  <span class="card-subtitle">Hourly distribution of Granted vs Denied attempts</span>
+                </div>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="accessHourlyChart"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Access History Table -->
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                  Access Verification Audit Log
+                </h2>
+                <span class="card-subtitle">Chronological record of all authentication events</span>
+              </div>
+              
+              <!-- Filter Controls -->
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" class="form-control" id="accSearchInput" placeholder="Search badge, user, ID..." style="width: 180px; padding: 6px 10px; font-size: 0.8rem;">
+                
+                <select class="form-control" id="accMethodFilter" style="width: 110px; padding: 6px 8px; font-size: 0.8rem;">
+                  <option value="all">All Methods</option>
+                  <option value="rfid">RFID Only</option>
+                  <option value="keypad">Keypad Only</option>
+                </select>
+
+                <select class="form-control" id="accStatusFilter" style="width: 120px; padding: 6px 8px; font-size: 0.8rem;">
+                  <option value="all">All Results</option>
+                  <option value="granted">Granted Only</option>
+                  <option value="denied">Denied Only</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Method &amp; Credential</th>
+                    <th>User Identity</th>
+                    <th>Access Result</th>
+                    <th>Event Description</th>
+                  </tr>
+                </thead>
+                <tbody id="accessHistoryTableBody">
+                  <!-- Populated dynamically by access-control.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             SECTION 4: ALERTS & NOTIFICATIONS PAGE
+             ============================================================== -->
+        <section class="view-section" id="view-alerts">
+          
+          <!-- Alerts Filter Bar -->
+          <div class="alert-filters-bar">
+            <div class="filter-pills-group">
+              <button class="filter-pill alert-filter-pill active" data-filter="all">
+                All Alerts (<span id="countAlertsAll">0</span>)
+              </button>
+              <button class="filter-pill alert-filter-pill" data-filter="critical">
+                Critical (<span id="countAlertsCritical">0</span>)
+              </button>
+              <button class="filter-pill alert-filter-pill" data-filter="warning">
+                Warning (<span id="countAlertsWarning">0</span>)
+              </button>
+              <button class="filter-pill alert-filter-pill" data-filter="resolved">
+                Resolved (<span id="countAlertsResolved">0</span>)
+              </button>
+            </div>
+
+            <button class="btn btn-secondary btn-sm" id="btnAcknowledgeAll">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Acknowledge All Active
+            </button>
+          </div>
+
+          <!-- Alerts Feed List -->
+          <div class="alert-feed-list" id="alertsFeedContainer">
+            <!-- Populated dynamically by alerts.js -->
+          </div>
+        </section>
+
+
+        <!-- ==============================================================
+             SECTION 5: SCENARIO SIMULATOR (MAKE-A-THON HIGHLIGHT)
+             ============================================================== -->
+        <section class="view-section" id="view-simulator">
+          
+          <!-- Demonstration Banner -->
+          <div class="simulator-banner">
+            <div class="simulator-banner-content">
+              <div class="sim-warning-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">
+                  Make-A-Thon Attack &amp; Anomaly Simulator
+                </h3>
+                <p style="font-size: 0.82rem; color: var(--text-secondary);">
+                  Test how the TRACE Digital Twin and mismatch engine detect physical tampering, brute-force attempts, and sensor failures in real-time. Events generated here are labeled as <strong>[SIMULATED]</strong>.
+                </p>
+              </div>
+            </div>
+
+            <button class="btn btn-danger btn-sm" id="btnResetSimulationTop">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              RESET SIMULATION
+            </button>
+          </div>
+
+          <!-- 4 Large Interactive Scenario Cards -->
+          <div class="scenarios-grid">
+            
+            <!-- SCENARIO 1: FORCED ENTRY -->
+            <div class="scenario-card" id="scenarioCard1">
+              <div>
+                <div class="scenario-header">
+                  <span class="scenario-tag">SCENARIO 1</span>
+                  <span class="badge badge-critical">CRITICAL ALERT</span>
+                </div>
+                <h3 class="scenario-title">Forced Entry Detection</h3>
+                <p class="scenario-desc">
+                  Simulate a physical pry attack causing a mismatch between the magnetic reed sensor and the locked servo actuator.
+                </p>
+              </div>
+
+              <div class="scenario-steps">
+                <div class="step-item" id="s1_step1">
+                  <div class="step-circle">1</div>
+                  <span>Actuator Deadbolt in LOCKED position</span>
+                </div>
+                <div class="step-item" id="s1_step2">
+                  <div class="step-circle">2</div>
+                  <span>Door pried open without unlock authorization</span>
+                </div>
+                <div class="step-item" id="s1_step3">
+                  <div class="step-circle">3</div>
+                  <span>Digital Twin detects state mismatch</span>
+                </div>
+                <div class="step-item" id="s1_step4">
+                  <div class="step-circle">4</div>
+                  <span>Strobe lights, siren buzzer &amp; critical incident triggered</span>
+                </div>
+              </div>
+
+              <button class="btn btn-danger" id="btnTriggerScenario1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Trigger Forced Entry Attack
+              </button>
+            </div>
+
+            <!-- SCENARIO 2: DOOR HELD OPEN -->
+            <div class="scenario-card" id="scenarioCard2">
+              <div>
+                <div class="scenario-header">
+                  <span class="scenario-tag">SCENARIO 2</span>
+                  <span class="badge badge-warning">WARNING ALERT</span>
+                </div>
+                <h3 class="scenario-title">Door Held Open Alert</h3>
+                <p class="scenario-desc">
+                  Simulate authorized entry followed by the door remaining propped or held open beyond the 120-second safety threshold.
+                </p>
+              </div>
+
+              <div class="scenario-steps">
+                <div class="step-item" id="s2_step1">
+                  <div class="step-circle">1</div>
+                  <span>Authorized unlock, door swings open</span>
+                </div>
+                <div class="step-item" id="s2_step2">
+                  <div class="step-circle">2</div>
+                  <span>Fast-forward timer exceeds 120-second limit</span>
+                </div>
+                <div class="step-item" id="s2_step3">
+                  <div class="step-circle">3</div>
+                  <span>Door-held-open warning flagged on digital twin</span>
+                </div>
+              </div>
+
+              <button class="btn btn-warning" id="btnTriggerScenario2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Trigger Door Held Open
+              </button>
+            </div>
+
+            <!-- SCENARIO 3: WRONG PIN (BRUTE FORCE) -->
+            <div class="scenario-card" id="scenarioCard3">
+              <div>
+                <div class="scenario-header">
+                  <span class="scenario-tag">SCENARIO 3</span>
+                  <span class="badge badge-critical">CRITICAL ALERT</span>
+                </div>
+                <h3 class="scenario-title">Brute-Force PIN Attack</h3>
+                <p class="scenario-desc">
+                  Simulate 3 consecutive incorrect PIN attempts at the keypad, triggering rule-based lockout and an immediate security alert.
+                </p>
+              </div>
+
+              <div class="scenario-steps">
+                <div class="step-item" id="s3_step1">
+                  <div class="step-circle">1</div>
+                  <span>Invalid PIN #1 entered ("1234") &rarr; Denied</span>
+                </div>
+                <div class="step-item" id="s3_step2">
+                  <div class="step-circle">2</div>
+                  <span>Invalid PIN #2 entered ("9999") &rarr; Denied</span>
+                </div>
+                <div class="step-item" id="s3_step3">
+                  <div class="step-circle">3</div>
+                  <span>Invalid PIN #3 entered &rarr; 60s Keypad Lockout triggered</span>
+                </div>
+              </div>
+
+              <button class="btn btn-danger" id="btnTriggerScenario3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Trigger 3x Wrong PIN Attack
+              </button>
+            </div>
+
+            <!-- SCENARIO 4: SENSOR FAILURE -->
+            <div class="scenario-card" id="scenarioCard4">
+              <div>
+                <div class="scenario-header">
+                  <span class="scenario-tag">SCENARIO 4</span>
+                  <span class="badge badge-critical">FAULT ALERT</span>
+                </div>
+                <h3 class="scenario-title">Sensor Failure / Loss</h3>
+                <p class="scenario-desc">
+                  Simulate physical wire severance or telemetry drop from the magnetic reed switch to demonstrate edge fault detection.
+                </p>
+              </div>
+
+              <div class="scenario-steps">
+                <div class="step-item" id="s4_step1">
+                  <div class="step-circle">1</div>
+                  <span>ESP32 telemetry line disconnect initiated</span>
+                </div>
+                <div class="step-item" id="s4_step2">
+                  <div class="step-circle">2</div>
+                  <span>Heartbeat timeout; sensor voltage drops to 0.0V</span>
+                </div>
+                <div class="step-item" id="s4_step3">
+                  <div class="step-circle">3</div>
+                  <span>Digital Twin flags communication warning fault</span>
+                </div>
+              </div>
+
+              <button class="btn btn-secondary" id="btnTriggerScenario4">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Trigger Sensor Fault Simulation
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Bottom Reset Bar -->
+          <div style="display: flex; justify-content: center; margin-top: 10px;">
+            <button class="btn btn-outline" id="btnResetSimulation" style="padding: 12px 28px; font-size: 0.95rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Reset All Simulations to Normal Secure Baseline
+            </button>
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             SECTION 6: EVENT HISTORY PAGE
+             ============================================================== -->
+        <section class="view-section" id="view-event-history">
+          
+          <!-- History Toolbar -->
+          <div class="history-toolbar">
+            <div class="history-search-box">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="form-control" id="historySearchInput" placeholder="Search by Event ID, User, Credential, or Description...">
+            </div>
+
+            <div class="history-filters-row">
+              <select class="form-control" id="historyTypeFilter" style="width: 140px;">
+                <option value="all">All Event Types</option>
+                <option value="granted">Access Granted</option>
+                <option value="denied">Access Denied</option>
+                <option value="alert">Security Alerts</option>
+                <option value="system">System Resets</option>
+              </select>
+
+              <select class="form-control" id="historySeverityFilter" style="width: 130px;">
+                <option value="all">All Severities</option>
+                <option value="normal">Normal</option>
+                <option value="warning">Warning</option>
+                <option value="critical">Critical</option>
+              </select>
+
+              <select class="form-control" id="historySourceFilter" style="width: 130px;">
+                <option value="all">All Sources</option>
+                <option value="hardware">Hardware</option>
+                <option value="simulated">Simulated</option>
+              </select>
+
+              <button class="btn btn-outline btn-sm" id="btnHistoryClearFilters">Clear Filters</button>
+              
+              <button class="btn btn-primary btn-sm" id="btnHistoryExportCSV">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Record Counter -->
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;" id="historyRecordCount">
+            Showing records (newest first)
+          </div>
+
+          <!-- Comprehensive Audit Table -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Event ID</th>
+                    <th>Date &amp; Time</th>
+                    <th>Event Type &amp; Details</th>
+                    <th>Method / User</th>
+                    <th>Prev State</th>
+                    <th>Current State</th>
+                    <th>Severity &amp; Source</th>
+                  </tr>
+                </thead>
+                <tbody id="eventHistoryTableBody">
+                  <!-- Populated dynamically by event-history.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             SECTION 7: SETTINGS PAGE
+             ============================================================== -->
+        <section class="view-section" id="view-settings">
+          <div class="settings-grid">
+            
+            <!-- Connection & Backend Settings -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    Backend &amp; Hardware Integration
+                  </h2>
+                  <span class="card-subtitle">Configure Flask &amp; ESP32 telemetry bridge</span>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Operation Mode</div>
+                  <div class="setting-desc">Switch between standalone DEMO and live Flask backend</div>
+                </div>
+                <select class="form-control" id="settingModeSelect" style="width: 170px;">
+                  <option value="demo">Demo Mode (Offline)</option>
+                  <option value="live">Live Hardware Mode</option>
+                </select>
+              </div>
+
+              <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                <div class="setting-info">
+                  <div class="setting-title">Flask Backend Target URL</div>
+                  <div class="setting-desc">Configurable REST and Socket.IO server endpoint</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" class="form-control" id="settingBackendUrl" value="http://localhost:5000" style="flex: 1;">
+                  <button class="btn btn-secondary btn-sm" id="btnSaveBackendUrl">Save</button>
+                  <button class="btn btn-primary btn-sm" id="btnTestConnection">Test Ping</button>
+                </div>
+                <div id="connectionTestResult" style="display: none; width: fit-content; margin-top: 4px;"></div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Connection Status</div>
+                  <div class="setting-desc">Real-time Socket.IO handshake indicator</div>
+                </div>
+                <span class="status-indicator-pill demo" id="settingConnectionStatus">
+                  <span class="status-dot"></span> DEMO MODE (STANDALONE)
+                </span>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Telemetry Round-Trip Latency</div>
+                  <div class="setting-desc">ESP32 packet ping to UI</div>
+                </div>
+                <span style="font-family: var(--font-mono); color: var(--accent-secondary);" id="settingPingValue">N/A</span>
+              </div>
+            </div>
+
+            <!-- UI & Audio Preferences -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#14B8A6" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    UI &amp; Audio Preferences
+                  </h2>
+                  <span class="card-subtitle">Customization &amp; sensory feedback</span>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Theme Contrast (Dark / Light)</div>
+                  <div class="setting-desc">Toggle high-contrast cybersecurity styling</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settingThemeToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Web Audio Sound Synthesizer</div>
+                  <div class="setting-desc">Enable tactile key beeps, RFID chirps, and alarm siren</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settingSoundToggle" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Audio Volume Level</div>
+                  <div class="setting-desc">Adjust master volume for sound synthesis</div>
+                </div>
+                <input type="range" id="settingVolumeSlider" min="0" max="100" value="50" style="width: 140px; accent-color: var(--accent-primary);">
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Sound Verification Preview</div>
+                  <div class="setting-desc">Test Web Audio tone outputs</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" id="btnTestChime">Test Chime</button>
+                  <button class="btn btn-outline btn-sm" id="btnTestSiren">Test Siren</button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <div class="setting-title">Reset Demo Baseline</div>
+                  <div class="setting-desc">Restore sample events, clear active alarms</div>
+                </div>
+                <button class="btn btn-outline btn-sm" id="btnResetAllDemoData">Reset Baseline</button>
+              </div>
+            </div>
+
+            <!-- Hardware Specifications Card -->
+            <div class="card" style="grid-column: 1 / -1;">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Physical Hardware Specifications (Make-A-Thon Prototype)
+                  </h2>
+                  <span class="card-subtitle">ESP32 IoT sensor node peripheral mapping</span>
+                </div>
+                <span class="badge badge-info">FIRMWARE v1.4.2-TRACE</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+                <div class="spec-item">
+                  <span class="spec-label">Microcontroller:</span>
+                  <span class="spec-val">ESP32 NodeMCU (Xtensa 240MHz)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Magnetic Sensor:</span>
+                  <span class="spec-val">Normally-Open Reed Switch (GPIO 4)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Lock Motor:</span>
+                  <span class="spec-val">SG90 9g Micro Servo 50Hz PWM (GPIO 18)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">RFID Reader:</span>
+                  <span class="spec-val">RC522 13.56MHz SPI (Pins 23,19,18,5,22)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Matrix Keypad:</span>
+                  <span class="spec-val">4x4 Membrane Keypad (GPIO Rows/Cols)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Audio Siren:</span>
+                  <span class="spec-val">5V Active Piezo Buzzer (GPIO 19)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Indicator LEDs:</span>
+                  <span class="spec-val">Dual Green / Red Status LEDs (GPIO 2 &amp; 15)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Power Supply:</span>
+                  <span class="spec-val">Regulated 5V 2A DC / Micro-USB</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Toast Notifications Floating Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+  </div>
+
+  <!-- Application JavaScript Modules -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/digital-twin.js"></script>
+  <script src="js/access-control.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/event-history.js"></script>
+  <script src="js/settings.js"></script>
+
+</body>
+</html>
